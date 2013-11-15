@@ -1,0 +1,82 @@
+%META:TOPICINFO{author="ProjectContributor" date="1356278777" format="1.1" version="1"}%
+---+!! NewUserPlugin
+%TOC%
+---++ Description
+This plugin is of use in those cases where users are registered and authenticated externally,
+for example using LDAP.
+So users are not registered natively using its own registration workflow and therefore don't
+have a user topic in the %USERSWEB% web.
+This plugin fills that gap and creates a user's topic if it does not yet exist.
+
+---++ Settings
+You can customize the template that is used to create a new user topic
+by setting the ={NewUserTemplate}= in =configure=, or by setting 
+a =NEWUSERTEMPLATE= preference variable (e.g. in %USERSWEB%.SitePreferences):
+
+   * Set NEWUSERTEMPLATE = %SYSTEMWEB%.NewLdapUserTemplate
+
+The latter will only take effect when not specified in =configure=.
+If not set, it defaults to <nop>NewUserTemplate. This plugin comes with an example template,
+NewLdapUserTemplate, to illustrate how to extract user data from an LDAP directory and integrate
+the information into the user's topic dynamically. You will need to install the
+Foswiki:Extensions/LdapNgPlugin and the Foswiki:Extensions/GluePlugin to make use of it.
+
+
+---++ Syntax
+During topic creation the following variables in the <nop>NEWUSERTEMPLATE are expanded:
+   * =$nop=: 
+   * =%<nop>WIKINAME%=:
+   * =%<nop<USERNAME%=
+   * =%<nop>WIKIUSERNAME%=
+   * =%<nop>EXPAND{...}%=
+   * =%<nop>STARTEXPAND%= ... =%<nop>STOPEXPAND%=
+
+To expand additional VARIABLES, you can use the =%<nop>EXPAND{}%= or =%<nop>STARTEXPAND%= ... %<nop>STOPEXPAND%=
+syntax.  All percent signs have to be escaped by =$percnt=, deeper recursion levels may
+use =$dollar=, too. 
+
+Example:
+<verbatim>
+%EXPAND{$percntGMTIME{"$year-$mo-$day"}$percnt}%
+</verbatim>
+
+---++ Installation Instructions
+%$INSTALL_INSTRUCTIONS%
+
+---++ Plugin Info
+This work is partly funded by 
+   * [[http://www.hennerich.de][T+T Hennerich <nop>GmbH]]
+   * [[http://www.trivadis.com][Trivadis AG]]
+
+<!--
+    * Set SHORTDESCRIPTION = Create a user topic if it does not exist yet
+-->
+|  Plugin Author: | Michael Daum |
+|  Copyright &copy;: | 2006-2013, Michael Daum http://michaeldaumconsulting.com |
+|  License: | GPL ([[http://www.gnu.org/copyleft/gpl.html][GNU General Public License]]) |
+|  Release: | %$RELEASE% |
+|  Version: | %$VERSION% |
+|  Change History: | <!-- versions below in reverse order -->&nbsp; |
+|  27 Feb 2013 | disabled debug flag by default |
+|  29 Nov 2012 | added service to bulk attach photos to user topics |
+|  22 Aug 2012 | fixed VIEW_TEMPLATE setting in new user profile pages |
+|  11 Jul 2012 | fixed expansion of variables in meta data |
+|  20 Jan 2012 | fixed creating user profiles by not using deprecate Func apis; \
+                 added better view template for ldap users; \
+                 added way to configure new user templates via =configure= | 
+|  11 Dec 2010 | fixed dependencies of plugin and simplified example !RenderLdapUser |
+|  13 Sep 2009 | creating user homepages as !RegistrationAgent |
+|  05 May 2009 | also expand %25WIKINAME%25 and friends |
+|  24 Apr 2009 | converted to foswiki plugin |
+|  18 Feb 2009 | homepages are only created if we can get a !WikiUserName that is a proper !WikiWord |
+|  15 Sep 2008 | Oliver Krueger: added EXPAND feature, removed noise in debug.txt |
+|  11 Jun 2008 | added =%<nop>STARTEXPAND%=, =%<nop>STOPEXPAND%= to expand TML during topic creation |
+|  12 Feb 2008 | remove leading/trailing whitespaces from NEWUSERTEMPLATE filename |
+|  09 Jan 2008 | fixed spelling error |
+|  03 Jan 2008 | fixed default values for NEWUSERTEMPLATE, clearing unset LDAP attributes |
+|  23 Oct 2007 | work around infinite loop in combination with <nop>ActionTrackerPlugin |
+|  17 Sep 2007 | replace usernames in formtemplates as well as in the topic text |
+|  18 Dec 2006 | initial release |
+|  Dependencies: | None |
+|  Plugin Home: | Foswiki:Extensions/%TOPIC% |
+|  Support: | Foswiki:Support/%TOPIC% |
