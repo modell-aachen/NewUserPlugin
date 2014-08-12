@@ -64,7 +64,6 @@ sub restCreateUserTopics {
 
   if ($passwordManager->canFetchUsers) {
     my $usersWeb = $Foswiki::cfg{UsersWebName};
-    my $wikiWordRegex = $Foswiki::regex{'wikiWordRegex'};
     my $it = $passwordManager->fetchUsers();
     my $count = 0;
     while ($it->hasNext()) {
@@ -72,10 +71,6 @@ sub restCreateUserTopics {
       my $wikiName = Foswiki::Func::userToWikiName($loginName, 1);
       #writeDebug("checking loginName=$loginName, wikiName=$wikiName");
       next if Foswiki::Func::topicExists($usersWeb, $wikiName);
-      unless ($wikiName =~ /^($wikiWordRegex)$/) {
-	writeDebug("user's wikiname '$wikiName' is not a WikiWord ... not creating a user topic");
-	next;
-      }
       writeDebug("creating a user topic for $wikiName");
       createUserTopic($wikiName);
       $count++;
