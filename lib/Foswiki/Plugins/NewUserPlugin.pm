@@ -105,11 +105,7 @@ sub beforeCommonTagsHandler {
   # does in some way exist ... which it doesn't in our definition, i.e.
   # if we don't get a proper WikiName; besides, the engine can't cope
   # with topics starting with a lowercase letter anyway
-  my $wikiWordRegex = $Foswiki::regex{'wikiWordRegex'};
-  unless ($wikiName =~ /^($wikiWordRegex)$/) {
-    writeDebug("user's wikiname '$wikiName' is not a WikiWord ... not creating a homepage");
-    return;
-  }
+  # XXX removed - krueger@modell-aachen.de
 
   writeDebug("creating homepage for user $wikiName");
   createUserTopic($wikiName)
