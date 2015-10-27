@@ -20,15 +20,12 @@ use Foswiki::Func ();
 use Foswiki::Sandbox ();
 
 our $defaultPhotoDir = '/tmp';
-our $debug = 0;
 
-sub writeDebug {
+sub _writeDebug {
   return unless $debug;
-  print STDERR 'AttachPhotos - '.$_[0]."\n";
-}
-
-sub writeWarning {
-  writeDebug('WARNING: '.$_[0]);
+  if ($Foswiki::cfg{NewUserPlugin}{Debug}) {
+      Foswiki::Func::writeDebug("NewUserPlugin/AttachPhotos.pm: " . $_[0]);
+  }
 }
 
 sub handle {
@@ -44,31 +41,31 @@ sub handle {
   my $passwordManager = $mapping->{passwords};
   my $usersWeb = $Foswiki::cfg{UsersWebName};
 
-  die "can't fetch users" unless $passwordManager->canFetchUsers;
+  die "Can't fetch users" unless $passwordManager->canFetchUsers;
 
   my $photoDir = $query->param("dir") || $defaultPhotoDir;
   $debug = Foswiki::Func::isTrue($query->param("debug"));
 
   die "photoDir=$photoDir does not exist" unless -d $photoDir;
 
-  writeDebug("photoDir=$photoDir");
+  _writeDebug("photoDir=$photoDir");
 
-  my $photos = cacheUserPhotos($photoDir); 
+  my $photos = cacheUserPhotos($photoDir);
 
   my $it = $passwordManager->fetchUsers();
   my $count = 0;
   while ($it->hasNext()) {
     my $loginName = $it->next();
     my $wikiName = Foswiki::Func::userToWikiName($loginName, 1);
-    writeDebug("checking loginName=$loginName, wikiName=$wikiName");
+    _writeDebug("Check loginName=$loginName, wikiName=$wikiName");
     unless (Foswiki::Func::topicExists($usersWeb, $wikiName)) {
-      writeDebug("no user topic found for $loginName (wikiName=$wikiName)... skipping");
+      _writeDebug("No user topic found for $loginName (wikiName=$wikiName)... skipping");
       next;
     }
 
     my $photo = $photos->{$loginName};
     unless (defined $photo) {
-      writeDebug("no photo for $loginName ... skipping");
+      _writeDebug("No photo for $loginName ... skipping");
       next;
     }
 
@@ -79,32 +76,31 @@ sub handle {
     foreach my $attachment (@attachments) {
       my $attachmentName = $attachment->{name};
       if ($attachmentName eq $photo->{name}) {
-	$found = 1;
-	last;
+    $found = 1;
+    last;
       }
     }
 
     if ($found) {
-      writeDebug("photo $photo->{name} is already attached to $wikiName ... skipping");
+      _writeDebug("Photo $photo->{name} is already attached to $wikiName ... skipping");
       next;
     }
     my @stats = stat $photo->{file};
     my $fileSize = $stats[7] || 0;
     my $fileDate = $stats[9] || 0;
 
-    writeDebug("attaching photo $photo->{file} (size=$fileSize) for $loginName to $usersWeb.$wikiName");
+    _writeDebug("attaching photo $photo->{file} (size=$fileSize) for $loginName to $usersWeb.$wikiName");
 
-    my $error = Foswiki::Func::saveAttachment($usersWeb, $wikiName, $photo->{name}, { 
+    my $error = Foswiki::Func::saveAttachment($usersWeb, $wikiName, $photo->{name}, {
       file => $photo->{file},
       filesize => $fileSize,
       size => $fileSize,
       filedate => $fileDate,
       comment => 'attached automatically',
-      hide => 1 
+      hide => 1
     });
 
     die $error if $error;
-
     $count++;
   }
 
@@ -112,19 +108,18 @@ sub handle {
     Foswiki::Plugins::DBCachePlugin::enableSaveHandler();
   }
 
-  writeDebug("processed $count user topics");
+  _writeDebug("Processed $count user topics");
 }
 
 sub cacheUserPhotos {
   my ($photoDir, $loginNamePattern) = @_;
 
   my %photos = ();
-  opendir(DIR, $photoDir) || die "can't open photoDir";
+  opendir(DIR, $photoDir) || die "Can't open photoDir";
   while (my $file = readdir(DIR)) {
     next if $file =~ /^\./;
     next unless $file =~ /\.(jpe?g|gif|png|bmp)$/i;
 
-    # untaint
     $file = Foswiki::Sandbox::untaintUnchecked($file);
 
     my $loginName = $file;
@@ -132,17 +127,17 @@ sub cacheUserPhotos {
       if (defined $1) {
         $file = $1
       }
-    } 
+    }
 
     $loginName =~ s/\..*$//; # strip off file extension
 
     if (defined $photos{$loginName}) {
       my $msg = "user $loginName already has got $photos{$loginName}{name}";
       if ($file =~ /^DETIS/) { # SMELL: client specific
-	writeDebug("$msg ... using $file instead");
+        _writeDebug("$msg ... using $file instead");
       } else {
-	writeDebug("$msg ... skipping $file");
-	next;
+        _writeDebug("$msg ... skipping $file");
+        next;
       }
     }
 
@@ -155,7 +150,7 @@ sub cacheUserPhotos {
     }
   }
   closedir(DIR);
- 
+
   return \%photos;
 }
 

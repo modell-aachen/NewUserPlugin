@@ -31,8 +31,6 @@ our $SHORTDESCRIPTION = 'Create a user topic if it does not exist yet';
 our $NO_PREFS_IN_TOPIC = 1;
 our $done;
 
-use constant DEBUG => 0; # toggle me
-
 ###############################################################################
 sub initPlugin {
   Foswiki::Func::registerRESTHandler('createUserTopics', \&restCreateUserTopics, authenticate => 1, validate => 0, http_allow => 'GET,POST');
@@ -42,16 +40,10 @@ sub initPlugin {
 }
 
 ###############################################################################
-sub writeDebug {
-  return unless DEBUG;
-  print STDERR 'NewUserPlugin - '.$_[0]."\n";
-  #Foswiki::Func::writeDebug("NewUserPlugin - $_[0]");
-}
-
-###############################################################################
-sub writeWarning {
-  writeDebug('WARNING: '.$_[0]);
-  Foswiki::Func::writeWarning("NewUserPlugin - ".$_[0]);
+sub _writeDebug {
+  if ($Foswiki::cfg{NewUserPlugin}{Debug}) {
+      Foswiki::Func::writeDebug("NewUserPlugin.pm: " . $_[0]);
+  }
 }
 
 ###############################################################################
@@ -68,16 +60,16 @@ sub restCreateUserTopics {
     while ($it->hasNext()) {
       my $loginName = $it->next();
       my $wikiName = Foswiki::Func::userToWikiName($loginName, 1);
-      #writeDebug("checking loginName=$loginName, wikiName=$wikiName");
+      _writeDebug("Check loginName=$loginName, wikiName=$wikiName");
       next if Foswiki::Func::topicExists($usersWeb, $wikiName);
-      writeDebug("creating a user topic for $wikiName");
+      _writeDebug("Create a user topic for $wikiName");
       createUserTopic($wikiName);
       $count++;
     }
 
-    writeDebug("created $count user topics");
+    _writeDebug("Created $count user topics");
   } else {
-    writeWarning("can't fetch users");
+    Foswiki::Func::writeWarning("Can't fetch users");
   }
 
   return;
@@ -92,21 +84,13 @@ sub beforeCommonTagsHandler {
   return if !defined($Foswiki::Plugins::SESSION->{i18n}) || $done;
   $done = 1;
 
-  #writeDebug("called beforeCommonTagsHandler");
+  _writeDebug("Called beforeCommonTagsHandler");
 
   my $wikiName = Foswiki::Func::getWikiName();
   my $usersWeb = $Foswiki::cfg{UsersWebname};
   return if Foswiki::Func::topicExists($usersWeb, $wikiName);
 
-  # SMELL: hack to prevent creation homepages for unknown user
-  # we can't ask the engine if the user exists when the user is authenticated
-  # externally as it assumes that any successfully authenticated user
-  # does in some way exist ... which it doesn't in our definition, i.e.
-  # if we don't get a proper WikiName; besides, the engine can't cope
-  # with topics starting with a lowercase letter anyway
-  # XXX removed - krueger@modell-aachen.de
-
-  writeDebug("creating homepage for user $wikiName");
+  _writeDebug("Create homepage for user $wikiName");
   createUserTopic($wikiName)
 }
 
@@ -132,7 +116,7 @@ sub expandVariables {
 }
 
 ###############################################################################
-# creates a user topic for the given wikiName
+# Creates a user topic for the given wikiName
 sub createUserTopic {
   my $wikiName = shift;
 
@@ -145,20 +129,18 @@ sub createUserTopic {
   my $tmplWeb;
   my $wikiUserName = $usersWeb.'.'.$wikiName;
 
-  # search the NEWUSERTEMPLATE
+  # Search the NEWUSERTEMPLATE
   $newUserTemplate =~ s/^\s+//go;
   $newUserTemplate =~ s/\s+$//go;
   $newUserTemplate =~ s/\%SYSTEMWEB\%/$systemWeb/g;
   $newUserTemplate =~ s/\%MAINWEB\%/$usersWeb/g;
 
-  # in users web
-  ($tmplWeb, $tmplTopic) =
-    Foswiki::Func::normalizeWebTopicName($usersWeb, $newUserTemplate);
+  # In users web
+  ($tmplWeb, $tmplTopic) = Foswiki::Func::normalizeWebTopicName($usersWeb, $newUserTemplate);
 
   unless (Foswiki::Func::topicExists($tmplWeb, $tmplTopic)) {
 
-    ($tmplWeb, $tmplTopic) =
-      Foswiki::Func::normalizeWebTopicName($systemWeb, $newUserTemplate);
+    ($tmplWeb, $tmplTopic) = Foswiki::Func::normalizeWebTopicName($systemWeb, $newUserTemplate);
 
     unless (Foswiki::Func::topicExists($tmplWeb, $tmplTopic)) {
       writeWarning("no new user template found"); # not found
@@ -166,18 +148,18 @@ sub createUserTopic {
     }
   }
 
-  #writeDebug("newusertemplate = $tmplWeb.$tmplTopic");
+  _writeDebug("newusertemplate = $tmplWeb.$tmplTopic");
 
-  # read the template
+  # Read the template
   my ($meta, $text) = Foswiki::Func::readTopic($tmplWeb, $tmplTopic);
   unless ($meta) {
     writeWarning("can't read $tmplWeb.$tmplTopic");
     return;
   }
 
-  # insert data
+  # Insert data
   my $loginName = Foswiki::Func::wikiToUserName($wikiName);
-  $text =~ s/\$nop//go; 
+  $text =~ s/\$nop//go;
   $text =~ s/\%USERNAME\%/$loginName/go;
   $text =~ s/\%WIKINAME\%/$wikiName/go;
   $text =~ s/\%WIKIUSERNAME\%/$wikiUserName/go;
@@ -192,19 +174,18 @@ sub createUserTopic {
     $field->{value} =~ s/\%STARTEXPAND\%(.*?)\%STOPEXPAND\%/Foswiki::Func::expandCommonVariables($1, $wikiName, $usersWeb)/ges;
   }
 
-  #writeDebug("patching in RegistrationAgent");
+  _writeDebug("Patch in RegistrationAgent");
 
   my $session = $Foswiki::Plugins::SESSION;
   my $origCUID = $session->{user};
-  my $registrationAgentCUID = 
-    Foswiki::Func::getCanonicalUserID($Foswiki::cfg{Register}{RegistrationAgentWikiName});
-  #writeDebug("registrationAgentCUID=$registrationAgentCUID");
+  my $registrationAgentCUID = Foswiki::Func::getCanonicalUserID($Foswiki::cfg{Register}{RegistrationAgentWikiName});
+  _writeDebug("registrationAgentCUID=$registrationAgentCUID");
 
   $session->{user} = $registrationAgentCUID;
-  #writeDebug("saving new user topic $usersWeb.$wikiName");
+  _writeDebug("Save new user topic $usersWeb.$wikiName");
 
   try {
-    # We use saveAs here, to prevent other plugins from interfering via handlers.
+    # We use saveAs here in order to prevent other plugins from interfering via handlers, e.g. KVPPlugin.
     my ($newmeta, undef) = Foswiki::Func::readTopic($usersWeb, $wikiName);
     $newmeta->text($text);
     $newmeta->saveAs($usersWeb, $wikiName, nohandlers => 1);
