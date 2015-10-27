@@ -182,15 +182,12 @@ sub createUserTopic {
   _writeDebug("registrationAgentCUID=$registrationAgentCUID");
 
   $session->{user} = $registrationAgentCUID;
-  _writeDebug("Save new user topic $usersWeb.$wikiName");
 
+  _writeDebug("Save new user topic $usersWeb.$wikiName");
   try {
-    # We use saveAs here in order to prevent other plugins from interfering via handlers, e.g. KVPPlugin.
-    my ($newmeta, undef) = Foswiki::Func::readTopic($usersWeb, $wikiName);
-    $newmeta->text($text);
-    $newmeta->saveAs($usersWeb, $wikiName, nohandlers => 1);
+    Foswiki::Func::saveTopic($usersWeb, $wikiName, $meta, $text);
   } catch Error::Simple with {
-    writeWarning("Error during save of $usersWeb.$wikiName: " . shift);
+    writeWarning("error during save of $usersWeb.$wikiName: " . shift);
   };
 
   $session->{user} = $origCUID;
