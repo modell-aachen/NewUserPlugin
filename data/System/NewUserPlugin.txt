@@ -43,16 +43,11 @@ Example:
 ---++ Installation Instructions
 %$INSTALL_INSTRUCTIONS%
 
----++ Plugin Info
-This work is partly funded by 
-   * [[http://www.hennerich.de][T+T Hennerich <nop>GmbH]]
-   * [[http://www.trivadis.com][Trivadis AG]]
-
 <!--
     * Set SHORTDESCRIPTION = Create a user topic if it does not exist yet
 -->
-|  Plugin Author: | Michael Daum |
-|  Copyright &copy;: | 2006-2013, Michael Daum http://michaeldaumconsulting.com |
+|  Plugin Author: | Michael Daum, Modell Aachen GmbH |
+|  Copyright: | &copy; 2006-2013, Michael Daum http://michaeldaumconsulting.com; &copy; 2014-2015 Modell Aachen GmbH |
 |  License: | GPL ([[http://www.gnu.org/copyleft/gpl.html][GNU General Public License]]) |
 |  Release: | %$RELEASE% |
 |  Version: | %$VERSION% |
@@ -78,5 +73,5 @@ This work is partly funded by
 |  17 Sep 2007 | replace usernames in formtemplates as well as in the topic text |
 |  18 Dec 2006 | initial release |
 |  Dependencies: | None |
-|  Plugin Home: | Foswiki:Extensions/%TOPIC% |
-|  Support: | Foswiki:Support/%TOPIC% |
+|  Plugin Home: | http://www.modell-aachen.de |
+|  Support: | http://www.modell-aachen.de |
