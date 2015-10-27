@@ -34,9 +34,7 @@ use constant DEBUG => 0; # toggle me
 
 ###############################################################################
 sub initPlugin {
-#  my ($topic, $web, $user) = @_;
-
-  Foswiki::Func::registerRESTHandler('createUserTopics', \&restCreateUserTopics);
+  Foswiki::Func::registerRESTHandler('createUserTopics', \&restCreateUserTopics, authenticate => 1, validate => 0, http_allow => 'GET,POST');
 
   $done = 0;
   return 1;
