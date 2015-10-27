@@ -196,4 +196,21 @@ sub createUserTopic {
   $session->{user} = $origCUID;
 }
 
+# MaintenancePlugin integration.
+sub maintenanceHandler {
+    Foswiki::Plugins::MaintenancePlugin::registerCheck("NewUserPlugin:debugmode", {
+        name => "NewUserPlugin debug mode",
+        description => "NewUserPlugin debug mode is disabled.",
+        check => sub {
+            my $result = { result => 0 };
+            if ( ( exists $Foswiki::cfg{NewUserPlugin}{Debug} ) and ( $Foswiki::cfg{NewUserPlugin}{Debug} ) ) {
+                $result->{result} = 1;
+                $result->{priority} = $Foswiki::Plugins::MaintenancePlugin::ERROR;
+                $result->{solution} = "Disable {NewUserPlugin}{Debug}.";
+            }
+            return $result;
+        }
+    });
+}
+
 1;
