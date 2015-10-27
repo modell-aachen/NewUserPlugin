@@ -1,5 +1,6 @@
 # Plugin for Foswiki - The Free and Open Source Wiki, http://foswiki.org/
 #
+# Copyright (C) 2014-2016 Modell Aachen GmbH http://www.modell-aachen.de
 # Copyright (C) 2006-2013 Michael Daum http://michaeldaumconsulting.com
 #
 # This program is free software; you can redistribute it and/or
