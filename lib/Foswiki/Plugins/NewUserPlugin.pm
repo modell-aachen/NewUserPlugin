@@ -201,11 +201,14 @@ sub createUserTopic {
 
   $session->{user} = $registrationAgentCUID;
   #writeDebug("saving new user topic $usersWeb.$wikiName");
-  
+
   try {
-    Foswiki::Func::saveTopic($usersWeb, $wikiName, $meta, $text);
+    # We use saveAs here, to prevent other plugins from interfering via handlers.
+    my ($newmeta, undef) = Foswiki::Func::readTopic($usersWeb, $wikiName);
+    $newmeta->text($text);
+    $newmeta->saveAs($usersWeb, $wikiName, nohandlers => 1);
   } catch Error::Simple with {
-    writeWarning("error during save of $usersWeb.$wikiName: " . shift);
+    writeWarning("Error during save of $usersWeb.$wikiName: " . shift);
   };
 
   $session->{user} = $origCUID;
