@@ -20,6 +20,7 @@ use Foswiki::Func ();
 use Foswiki::Sandbox ();
 
 our $defaultPhotoDir = '/tmp';
+our $debug = 0;
 
 sub _writeDebug {
   return unless $debug;

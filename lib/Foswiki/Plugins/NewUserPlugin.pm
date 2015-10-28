@@ -36,14 +36,12 @@ sub initPlugin {
   Foswiki::Func::registerRESTHandler('createUserTopics', \&restCreateUserTopics, authenticate => 1, validate => 0, http_allow => 'GET,POST');
 
   $done = 0;
-  return 1;
-}
-
-###############################################################################
-sub _writeDebug {
   if ($Foswiki::cfg{NewUserPlugin}{Debug}) {
-      Foswiki::Func::writeDebug("NewUserPlugin.pm: " . $_[0]);
+    *{Foswiki::Plugins::NewUserPlugin::_writeDebug} = sub { Foswiki::Func::writeDebug("NewUserPlugin.pm: " . $_[0]); };
+  } else {
+    *{Foswiki::Plugins::NewUserPlugin::_writeDebug} = sub {};
   }
+  return 1;
 }
 
 ###############################################################################
