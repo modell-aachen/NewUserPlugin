@@ -137,11 +137,10 @@ sub createUserTopic {
   ($tmplWeb, $tmplTopic) = Foswiki::Func::normalizeWebTopicName($usersWeb, $newUserTemplate);
 
   unless (Foswiki::Func::topicExists($tmplWeb, $tmplTopic)) {
-
     ($tmplWeb, $tmplTopic) = Foswiki::Func::normalizeWebTopicName($systemWeb, $newUserTemplate);
 
     unless (Foswiki::Func::topicExists($tmplWeb, $tmplTopic)) {
-      writeWarning("no new user template found"); # not found
+      Foswiki::Func::writeWarning("No new user template found");
       return;
     }
   }
@@ -151,7 +150,7 @@ sub createUserTopic {
   # Read the template
   my ($meta, $text) = Foswiki::Func::readTopic($tmplWeb, $tmplTopic);
   unless ($meta) {
-    writeWarning("can't read $tmplWeb.$tmplTopic");
+    Foswiki::Func::writeWarning("Can't read $tmplWeb.$tmplTopic");
     return;
   }
 
@@ -185,7 +184,7 @@ sub createUserTopic {
   try {
     Foswiki::Func::saveTopic($usersWeb, $wikiName, $meta, $text);
   } catch Error::Simple with {
-    writeWarning("error during save of $usersWeb.$wikiName: " . shift);
+    Foswiki::Func::writeWarning("Error during save of $usersWeb.$wikiName: " . shift);
   };
 
   $session->{user} = $origCUID;
