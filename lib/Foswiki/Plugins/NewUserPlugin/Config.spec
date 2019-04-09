@@ -4,7 +4,7 @@
 
 # **STRING**
 # Template topic to be used when creating a new user page in "Web.Topic" format.
-$Foswiki::cfg{NewUserPlugin}{NewUserTemplate} = '%SYSTEMWEB%.NewLdapUserTemplate';
+$Foswiki::cfg{NewUserPlugin}{NewUserTemplate} = 'Main.NewUserTemplate';
 
 # **BOOLEAN**
 # Enable/disable output to debug.log.
